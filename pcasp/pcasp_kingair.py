@@ -12,7 +12,7 @@
  
  If this program is not executable.
  
- View the output using 'gv' on bat.
+ View the output using 'display' on bat or connecting to server and opening file in local OS.
  
  Measures particles  from 0.1 - 3 micron in diameter.
  There are 31 channels, this is due to the way the instrument is processed by NCAR software.
@@ -57,15 +57,19 @@ import numpy as np
 # Set up path to file
 project = "pecan15"
 #fDir = "/netdata/kingair_data/" + project + "/work/"
-fDir = "/Users/guy/software/king_air/pcasp/"
+fDir = "/kingair_data/" + project + "/work/"
 nc_filename = '20150506.c1.nc'
 nc_path_filename  = fDir + nc_filename
+Imagepath = "/home/bguy/images/pcasp"
 createImage = True # True to save, False to display on screen
 
 
 # Create a list of date-time pairs to use for subsetting
 # To do so add any number of dtpairs.append() after dtpairs is defined
 dts = []
+#dts.append([(2015, 5, 27, 22, 5, 0), (2015, 5, 27, 22, 10, 0)])
+#dts.append([(2015, 5, 27, 22, 35, 0), (2015, 5, 27, 22, 40, 0)])
+
 dts.append([(2015, 5, 6, 16, 50, 0), (2015, 5, 6, 17, 0, 0)])
 dts.append([(2015, 5, 6, 17, 31, 0), (2015, 5, 6, 17, 33, 0)])
 dts.append([(2015, 5, 6, 17, 40, 0), (2015, 5, 6, 17, 45, 0)])
@@ -254,7 +258,8 @@ class CheckPCASP(object):
 
         if save:
             # Set the output file name
-            outfile = './pcasp_timeseries_' + os.path.splitext(self.filename)[0] + '.png'
+            outfile = Imagepath + '/pcasp_timeseries_' + os.path.splitext(self.filename)[0] + '.png'
+            print "Creating image: " + outfile
             plt.savefig(outfile, format='png')
         else:
             plt.show()
@@ -288,6 +293,7 @@ class CheckPCASP(object):
             # Make title from these times
             figtitle = stime.strftime(fmt) + ' - ' + etime.strftime(fmt)
             
+            ##if self.pcasp[ 
             # Calculate Poisson error from Cai et al. AMT (2013), Equation A4
             yerr = self.pcaspf.between_time(stime, etime).sum(axis=0).divide(self.flow3s.between_time(stime, etime).sum(axis=0)**2).pow(0.5).mul(1./self.dlog10d)
 
@@ -313,8 +319,9 @@ class CheckPCASP(object):
 
         if save:
             # Set the output file name
-            outfile = './pcasp_timehist' + os.path.splitext(self.filename)[0] + '.png'
+            outfile = Imagepath + '/pcasp_timehist_' + os.path.splitext(self.filename)[0] + '.png'
             plt.savefig(outfile, format='png')
+            print "Creating image: " + outfile
         else:
             plt.show()
 
@@ -325,4 +332,7 @@ if __name__ == '__main__':
     # Start the check class
     an = CheckPCASP(nc_path_filename, dts)
     an.plot_timeseries(save=createImage)
-    an.plot_histograms(save=createImage)
+    if len(dts) > 0:
+        an.plot_histograms(save=createImage)
+    else:
+        print "No subset times selected, therefore no histogram plot created"
