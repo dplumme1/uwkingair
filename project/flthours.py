@@ -6,11 +6,11 @@
 # import required packages
 import os
 import argparse
-import datetime
+from datetime import datetime
 import pandas as pd
 import numpy as np
 
-from bokeh.plotting import show, save, figure, output_file
+from bokeh.plotting import show, save, figure, output_file, ColumnDataSource
 from bokeh.models import HoverTool
 from collections import OrderedDict
 
@@ -40,7 +40,6 @@ class FltHrs(object):
 
         # Set date formats to be used with datetime
         self.d_fmt = "%Y-%m-%d %H:%M"
-        self.dout_fmt = "%Y-%m-%d_%H:%M"
         
         # Use passed arguments
         self.project = args.project
@@ -50,8 +49,8 @@ class FltHrs(object):
         self.url = "http://flights.uwyo.edu/projects/" + self.project + "/"
         
         # Create an date-time array for project hours
-        self.start = datetime.datetime.strptime(args.start, "%Y-%m-%d")
-        self.end = datetime.datetime.strptime(args.end, "%Y-%m-%d")
+        self.start = datetime.strptime(args.start, "%Y-%m-%d")
+        self.end = datetime.strptime(args.end, "%Y-%m-%d")
         #Calculate the number of days in project
         self.projdays = (self.end - self.start).days
         
@@ -65,7 +64,7 @@ class FltHrs(object):
         self.df = pd.read_html(self.url, header=1, parse_dates=True, index_col=0)
         self.df[1].sort(ascending=True, inplace=True)
 #        self.df[2].reindex(index=self.df[2].index[::-1])
-        
+
         # Create a date array
         self.reshrs = self.df[1]['Hours'].sum()
         
@@ -81,7 +80,7 @@ class FltHrs(object):
             webpath = os.sep.join(['/home/webadmin','flights','projects',self.project,'flthours.js'])
         else:
             webpath = os.sep.join([loc,'flthours.js'])
-        nowdate = datetime.datetime.now()
+        nowdate = datetime.now()
         
         # Create string
         strout = "var flthours = 'As of %s, %.1f out of %d research hours were flown, "\
@@ -123,12 +122,20 @@ class FltHrs(object):
         TOOLS = "pan,wheel_zoom,box_zoom,reset,save,hover"
         TITLE = "UWKA %s: Flight Hours"%(self.project)
         
+        # Create a data source for 
+        source = ColumnDataSource(
+                  data=dict(
+                  Date=self.df[1].index.format(),
+                  Flight=self.df[1]['Flight#(*.kml)'].values,
+                       )
+                 )
+        
         self.hrsrng.plot()
         p = figure(x_axis_type = "datetime", tools=TOOLS, width=width, height=height)
         p.line(self.hrsrng.index.values, self.hrsrng.values, color='black', \
                 legend='Allocated', line_width=ln_wd)
         p.circle(self.df[1].index.values, self.df[1]['Hours'].cumsum().values, color='red', \
-                  legend='Cumulative', size=sz)
+                  legend='Cumulative', size=sz, source=source)
         p.title = TITLE
         p.grid.grid_line_alpha=0.3
         p.xaxis.axis_label = 'Date'
@@ -137,8 +144,9 @@ class FltHrs(object):
         
         hover = p.select(dict(type=HoverTool))
         hover.tooltips = OrderedDict([
-            ("Cum. Hours", "$y"),
-            ("Date", "$x"),
+            ("Cum. Hours", "@y"),
+            ("Date", "@Date"),
+            ("Flight", "@Flight"),
             ("index", "$index"),
         ])
         
