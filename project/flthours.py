@@ -63,7 +63,6 @@ class FltHrs(object):
         # Load in the URL and parse
         self.df = pd.read_html(self.url, header=1, parse_dates=True, index_col=0)
         self.df[1].sort(ascending=True, inplace=True)
-#        self.df[2].reindex(index=self.df[2].index[::-1])
 
         # Create a date array
         self.reshrs = self.df[1]['Hours'].sum()
@@ -127,6 +126,7 @@ class FltHrs(object):
                   data=dict(
                   Date=self.df[1].index.format(),
                   Flight=self.df[1]['Flight#(*.kml)'].values,
+                  Hours=self.df[1]['Hours'].values,
                        )
                  )
         
@@ -147,11 +147,12 @@ class FltHrs(object):
             ("Cum. Hours", "@y"),
             ("Date", "@Date"),
             ("Flight", "@Flight"),
+            ("Hours","@Hours"),
             ("index", "$index"),
         ])
         
-        #show(p)
-        save(obj=p, filename=filepath, title=pagetitle)
+        show(p)
+        #save(obj=p, filename=filepath, title=pagetitle)
         
 #####################
 ## RUN THE PROGRAM ##
