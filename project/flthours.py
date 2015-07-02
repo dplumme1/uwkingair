@@ -62,16 +62,22 @@ class FltHrs(object):
         '''Function to return flight data from web'''
         # Load in the URL and parse
         self.df = pd.read_html(self.url, header=1, parse_dates=True, index_col=0)
-        self.df[1].sort(ascending=True, inplace=True)
-
-        # Create a date array
+        
+        # Sum the research, calibration, and test hours
         self.reshrs = self.df[1]['Hours'].sum()
+        self.calhrs = self.df[2]['Hours'].sum()
+        self.testhrs = self.df[3]['Hours'].sum()
+
+        # Calculate the total hours in the field
+        self.fieldhrs = self.reshrs + self.calhrs
+
+        # Create arrays for research and calibration flights
+        self.resflt = self.df[1]
+        self.calflt = self.df[2]
+        self.resflt.sort(ascending=True, inplace=True)
+        self.calflt.sort(ascending=True, inplace=True)
         
-        # Grab the test and research flights
-        self.testhrs = self.df[2]['Hours'].sum()
-        
-        # Create a datetime function for 
-        
+
     def write_json(self, loc=None):
         '''Create a JSON text output file with total flight hours to date'''
         # Full path of JSON file
@@ -84,8 +90,8 @@ class FltHrs(object):
         # Create string
         strout = "var flthours = 'As of %s, %.1f out of %d research hours were flown, "\
                  "%.1f remain.';\n"%\
-                 (nowdate.strftime("%b %d, %Y"), self.reshrs, \
-                  self.hours, self.hours-self.reshrs)
+                 (nowdate.strftime("%b %d, %Y"), self.fieldhrs, \
+                  self.hours, self.hours-self.fieldhrs)
         
         # Open and write json file
         js = open(webpath, 'w')
@@ -122,11 +128,19 @@ class FltHrs(object):
         TITLE = "UWKA %s: Flight Hours"%(self.project)
         
         # Create a data source for 
-        source = ColumnDataSource(
+        sourceres = ColumnDataSource(
                   data=dict(
-                  Date=self.df[1].index.format(),
-                  Flight=self.df[1]['Flight#(*.kml)'].values,
-                  Hours=self.df[1]['Hours'].values,
+                  Date=self.resflt.index.format(),
+                  Flight=self.resflt['Flight#(*.kml)'].values,
+                  Hours=self.resflt['Hours'].values,
+                       )
+                 )
+                 
+        sourcecal = ColumnDataSource(
+                  data=dict(
+                  Date=self.calflt.index.format(),
+                  Flight=self.calflt['Flight#(*.kml)'].values,
+                  Hours=self.calflt['Hours'].values,
                        )
                  )
         
@@ -134,8 +148,10 @@ class FltHrs(object):
         p = figure(x_axis_type = "datetime", tools=TOOLS, width=width, height=height)
         p.line(self.hrsrng.index.values, self.hrsrng.values, color='black', \
                 legend='Allocated', line_width=ln_wd)
-        p.circle(self.df[1].index.values, self.df[1]['Hours'].cumsum().values, color='red', \
-                  legend='Cumulative', size=sz, source=source)
+        p.circle(self.resflt.index, self.resflt['Hours'].cumsum().values, color='red', \
+                  legend='Cumulative', size=sz, source=sourceres)
+        p.circle(self.calflt.index, self.calflt['Hours'].cumsum().values, color='blue', \
+                  legend='Cumulative', size=sz, source=sourcecal)
         p.title = TITLE
         p.grid.grid_line_alpha=0.3
         p.xaxis.axis_label = 'Date'
