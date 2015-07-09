@@ -62,18 +62,25 @@ class FltHrs(object):
         '''Function to return flight data from web'''
         # Load in the URL and parse
         self.df = pd.read_html(self.url, header=1, parse_dates=True, index_col=0)
+        
+        # Save individual flights
+        # If there is a post project table on page then these numbers
+        # will need to increment integer + 1
+        self.resflt = self.df[0]
+        self.calflt = self.df[1]
+        self.testflt = self.df[2]
 
         # Sum the research, calibration, and test hours
-        self.reshrs = self.df[1]['Hours'].sum()
-        self.calhrs = self.df[2]['Hours'].sum()
-        self.testhrs = self.df[3]['Hours'].sum()
+        self.reshrs = self.resflt['Hours'].sum()
+        self.calhrs = self.calflt['Hours'].sum()
+        self.testhrs = self.testflt['Hours'].sum()
 
         # Calculate the total hours in the field
         self.fieldhrs = self.reshrs + self.calhrs
 
         # Create arrays for research and calibration flights
-        self.resflt = pd.concat([self.df[1],self.df[2]])
-        self.calflt = self.df[2]
+        self.resflt = pd.concat([self.resflt,self.calflt])
+        self.calflt = self.calflt
         self.resflt.sort(ascending=True, inplace=True)
         self.calflt.sort(ascending=True, inplace=True)
 
