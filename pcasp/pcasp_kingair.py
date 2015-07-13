@@ -44,6 +44,7 @@
 """
 # import required packages
 import os
+import argparse
 import matplotlib.pyplot as plt
 import matplotlib
 #import xray
@@ -51,17 +52,33 @@ import netCDF4
 import pandas as pd
 import numpy as np
 
+########################
+### GLOBAL VARIABLES ###
+########################
+VERSION = "2015.07.15"
+
 ###########################
 ### USER INPUT BEGIN ###
 ###########################
 # Set up path to file
-project = "pecan15"
-#fDir = "/netdata/kingair_data/" + project + "/work/"
-fDir = "/kingair_data/" + project + "/work/"
-nc_filename = '20150506.c1.nc'
-nc_path_filename  = fDir + nc_filename
-Imagepath = "/home/bguy/images/pcasp"
-createImage = True # True to save, False to display on screen
+PROJECT = "pecan15"
+
+# Change the min/max of each plot by adjusting below
+LIMS = {"tas" : (0., 150.),
+        "alt" : (1000., 10000.),
+        "flow" : (0., 2.),
+        "ch0" : (-100., 900.),
+        "ch1" : (-100., 900.),
+        "chsum" : (-100., 900.),
+        "cpc_comp" : (0., 5000.),
+        "lwc" : (0., 1.5),
+}
+##fDir = "/netdata/kingair_data/" + project + "/work/"
+#fDir = "/kingair_data/" + project + "/work/"
+#nc_filename = '20150506.c1.nc'
+#nc_path_filename  = fDir + nc_filename
+#Imagepath = "/home/bguy/images/pcasp"
+#createImage = True # True to save, False to display on screen
 
 
 # Create a list of date-time pairs to use for subsetting
@@ -70,10 +87,10 @@ dts = []
 #dts.append([(2015, 5, 27, 22, 5, 0), (2015, 5, 27, 22, 10, 0)])
 #dts.append([(2015, 5, 27, 22, 35, 0), (2015, 5, 27, 22, 40, 0)])
 
-dts.append([(2015, 5, 6, 16, 50, 0), (2015, 5, 6, 17, 0, 0)])
-dts.append([(2015, 5, 6, 17, 31, 0), (2015, 5, 6, 17, 33, 0)])
-dts.append([(2015, 5, 6, 17, 40, 0), (2015, 5, 6, 17, 45, 0)])
-dts.append([(2015, 5, 6, 17, 59, 0), (2015, 5, 6, 18, 3, 0)])
+#dts.append([(2015, 5, 6, 16, 50, 0), (2015, 5, 6, 17, 0, 0)])
+#dts.append([(2015, 5, 6, 17, 31, 0), (2015, 5, 6, 17, 33, 0)])
+#dts.append([(2015, 5, 6, 17, 40, 0), (2015, 5, 6, 17, 45, 0)])
+#dts.append([(2015, 5, 6, 17, 59, 0), (2015, 5, 6, 18, 3, 0)])
 
 ###########################
 ### USER INPUT END ###
@@ -178,7 +195,7 @@ class CheckPCASP(object):
             ax.fill_between(self.time, ylim[0], ylim[1], \
                             where=(self.time>=stime)&(self.time<=etime), alpha=0.3)
         
-    def plot_timeseries(self, save=False, fancy=True):
+    def plot_timeseries(self, project, save=False, save_dir=None, fancy=True):
         '''Create an timeseries plot of specific variables.
         
         Parameters::
@@ -191,8 +208,13 @@ class CheckPCASP(object):
         if fancy:
             matplotlib.style.use('ggplot')
         
+        # Decrease the legend font size
+        matplotlib.rcParams.update({'legend.fontsize': 'x-small',
+                                    'legend.frameon':False,
+                                    'legend.framealpha':0.5})
+        
         # Make title
-        figtitle = "NOAA PCASP " + self.filename
+        figtitle = project + " NOAA PCASP " + self.filename
         
         # Create the figure/axes instances
         fig, (ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8) = plt.subplots(nrows=8, ncols=1, figsize=(8, 11))
@@ -200,7 +222,7 @@ class CheckPCASP(object):
         # Plot True air speed
         self.tass.plot(style='k-', ax=ax1, sharex=True, legend=True)
         ax1.set_ylabel('m/s')
-        ax1.set_ylim(bottom=0., top=150.)
+        ax1.set_ylim(bottom=LIMS['tas'][0], top=LIMS['tas'][1])
         ax1.grid(which='minor')
         ax1.set_title(figtitle)
         self._draw_time_region(ax1)
@@ -208,7 +230,7 @@ class CheckPCASP(object):
         # Plot Altitude
         self.alts.plot(style='k-', ax=ax2, legend=True)
         ax2.set_ylabel('m')
-        ax2.set_ylim(bottom=500., top=6500.)
+        ax2.set_ylim(bottom=LIMS['alt'][0], top=LIMS['alt'][1])
         ax2.grid(which='minor')
         self._draw_time_region(ax2)
 
@@ -216,56 +238,57 @@ class CheckPCASP(object):
         self.flow1s.plot(style='k-', ax=ax3, legend=True)
         self.flow2s.divide(10.).plot(style='r:', ax=ax3, legend=True) # Divide by 10
         ax3.set_ylabel('Flows')
-        ax3.set_ylim(bottom=0., top=2.)
+        ax3.set_ylim(bottom=LIMS['flow'][0], top=LIMS['flow'][1])
         ax3.grid(which='minor')
         self._draw_time_region(ax3)
 
         # Plot Channel # 0 counts
         self.ch0s.plot(style='k-', ax=ax4, legend=True)
         ax4.set_ylabel('Counts')
-        ax4.set_ylim(bottom=-100., top=900.)
+        ax4.set_ylim(bottom=LIMS['ch0'][0], top=LIMS['ch0'][1])
         ax4.grid(which='minor')
         self._draw_time_region(ax4)
 
         # Plot Channel # 1 counts
         self.ch1s.plot(style='k-', ax=ax5, legend=True)
         ax5.set_ylabel('Counts')
-        ax5.set_ylim(bottom=-100., top=900.)
+        ax5.set_ylim(bottom=LIMS['ch1'][0], top=LIMS['ch1'][1])
         ax5.grid(which='minor')
         self._draw_time_region(ax5)
 
         # Plot Channels 2-29 Sum
         self.chsums.plot(style='k-', ax=ax6, legend=True)
         ax6.set_ylabel('Counts')
-        ax6.set_ylim(bottom=-100., top=900.)
+        ax6.set_ylim(bottom=LIMS['chsum'][0], top=LIMS['chsum'][1])
         ax6.grid(which='minor')
         self._draw_time_region(ax6)
 
         # Plot PCASP & CPC concentrations
         self.chsums.divide(self.flow3s).plot(style='k-', ax=ax7, legend=True)
-        self.cpcs.plot(style='r:', ax=ax7)
+        self.cpcs.plot(style='r:', ax=ax7, legend=True)
         ax7.set_ylabel(r"cm$^{-3}$")
-        ax7.set_ylim(bottom=0., top=3000.)
+        ax7.set_ylim(bottom=LIMS['cpc_comp'][0], top=LIMS['cpc_comp'][1])
         ax7.grid(which='minor')
         self._draw_time_region(ax7)
 
         # Plot LWC
         self.lwcs.plot(style='k-', ax=ax8, legend=True)
         ax8.set_ylabel(r"g cm$^{-3}$")
-        ax8.set_ylim(bottom=0., top=1.5)
+        ax8.set_ylim(bottom=LIMS['lwc'][0], top=LIMS['lwc'][1])
         ax8.grid(which='minor')
         self._draw_time_region(ax8)
 
         if save:
             # Set the output file name
-            outfile = Imagepath + '/pcasp_timeseries_' + os.path.splitext(self.filename)[0] + '.png'
+            fname = "pcasp_timeseries_" + os.path.splitext(self.filename)[0] + ".png"
+            outfile = os.sep.join([save_dir, fname])
             print "Creating image: " + outfile
             plt.savefig(outfile, format='png')
         else:
             plt.show()
 
         
-    def plot_histograms(self, save=False, fancy=True):
+    def plot_histograms(self, save=False, save_dir=None, fancy=True):
         '''Create an timeseries plot of specific variables.
         
         Parameters::
@@ -319,20 +342,89 @@ class CheckPCASP(object):
 
         if save:
             # Set the output file name
-            outfile = Imagepath + '/pcasp_timehist_' + os.path.splitext(self.filename)[0] + '.png'
+            fname = "pcasp_timehist_" + os.path.splitext(self.filename)[0] + ".png"
+            outfile = os.sep.join([save_dir, fname])
             plt.savefig(outfile, format='png')
             print "Creating image: " + outfile
         else:
             plt.show()
+            
+def parse():
+    '''
+    Parse the input command line.
+    Parameters::
+    ----------
+    argv - string
+        Input command line string.
+    Notes::
+    -----
+    Returns directory and field for initialization.
+    '''
+    parser = argparse.ArgumentParser(
+              description="Start PCASP Check Software.")
+
+    parser.add_argument('-v', '--version', action='version',
+                        version='ARTview version %s' % (VERSION))
+
+    # Directory argument now optional
+    parser.add_argument('-f', '--file', type=str,
+                        help="File to process",
+                        default=None)
+    parser.add_argument('-d', '--directory', type=str,
+                        help="Directory where file is located", 
+                        default=None)
+    parser.add_argument('-p', '--project', type=str,
+                        help="Project (e.g. pecan15)",
+                        default=None)
+    parser.add_argument('-s', '--save', type=str,
+                        help="True to save False",
+                        default=None)
+    parser.add_argument('-i', '--imagepath', type=str,
+                        help="Path to save output image",
+                        default=None)
+
+    # Parse the args
+    args = parser.parse_args()#argv[1::])
+    print args
+    
+    if args.file is None:
+        print "ERROR: Please Choose file to process"
+        print "For useage help: pcaspy_kingair.py -h"
+        print "-------------------------------------"
+        return
+    if args.project is None:
+        args.project = PROJECT
+    if args.directory is None:
+        args.directory = os.sep.join(["/kingair_data", args.project, "work"])
+    # This next line saves an image if '-s' or '--save' has anything
+    if args.save is None:
+        args.save = False
+    else:
+        args.save = True
+    # If an image path is provided
+    if args.imagepath is None:
+        args.imagepath = os.path.dirname(os.path.realpath(__file__))
+    else:
+        if (os.path.exists(args.imagepath)):
+            args.save = True
+        else:
+            args.save = False
+            print "Directory does not exist, cannot save file!"
+
+    return args
 
 #####################
 ## RUN THE PROGRAM ##
 #####################
 if __name__ == '__main__':
+    # Call the parser get command line input
+    cmdargs = parse()
+    nc_filepath = os.sep.join([cmdargs.directory, cmdargs.file])
+
     # Start the check class
-    an = CheckPCASP(nc_path_filename, dts)
-    an.plot_timeseries(save=createImage)
+    an = CheckPCASP(nc_filepath, dts)
+    an.plot_timeseries(cmdargs.project, save=cmdargs.save, save_dir=cmdargs.imagepath)
     if len(dts) > 0:
-        an.plot_histograms(save=createImage)
+        an.plot_histograms(save=cmdargs.save, save_dir=cmdargs.imagepath)
     else:
         print "No subset times selected, therefore no histogram plot created"
