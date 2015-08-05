@@ -21,3 +21,4 @@ Nick has begun to port some software over to python and in some cases you will f
 
     Larry Oolman (ldoolman@uwyo.edu)
 
+	Individual directories have instrument-specific contacts.
