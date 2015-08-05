@@ -7,6 +7,7 @@ This repository contains various scripts and code related to the University of W
 There are directories corresponding to different instruments. You can find code in various languages.
 
 See below for file extension and corresponding program language:
+
 	.pro --> IDL
 	
 	.m   --> Matlab
@@ -17,8 +18,8 @@ Nick has begun to port some software over to python and in some cases you will f
 
 ##Contact information:
 
-    Nick Guy (nick.guy@uwyo.edu)
+Nick Guy (nick.guy@uwyo.edu)
 
-    Larry Oolman (ldoolman@uwyo.edu)
+Larry Oolman (ldoolman@uwyo.edu)
 
-	Individual directories have instrument-specific contacts.
+Individual directories have instrument-specific contacts.

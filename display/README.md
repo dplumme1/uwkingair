@@ -41,5 +41,7 @@ Transmitter Leakage - Remove gates affected by transmitter leakage.
 ```
 
 Contact:
+
 Dr. Yonggang Wang (WYG@uwyo.edu)
+
 Dr. Bart Geerts (Geerts@uwyo.edu)
