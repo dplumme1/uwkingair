@@ -39,42 +39,61 @@ ________________________________________________________________________________
 ##Routines for handling WCR raw data
 
 closewcr2.pro         - closes open WCR2 raw file
+
 initwcr2.pro          - returns a WCR2 parameters structure for a 
                         WCR2 raw data file
+                        
 loadwcr2conf.pro      - loads WCR2 configuration structure
+
 openwcr2.pro          - opens WCR2 raw file, reads file header(s), and 
                         returns a structure withfile information
+                        
 plotwcr2crcal.pro     - processing and plotting Corner Reflector 
                         calibration
+                        
 plotwcr2qam.pro       - make ps, pdf and txt files with data quality 
                         plots and radar parameters statistics for 
                         multiple WCR2 raw files
+                        
 plotwcr2qa.pro        - makes plots of radar noise and other data 
                         quality checks
+                        
 printwcr2info.pro     - print a WCR2 raw file parameters and statistics
+
 readwcr2data.pro      - returns a WCR2 data structure of a WCR2 data file
+
 readwcr2raw.pro       - reads WCR2 raw file records (radar profiles)
+
 reopenwcr2.pro        - re-opens WCR2 raw file for which wcr2finfo 
                         structure exists
+                        
 wcr2beamcal.pro       - analyze WCR2 antenna beam angles in aircraft 
                         reference frame and returns the optimized beam 
                         unit vector for that antenna
+                        
 wcr2beamfind.pro      - returns beam unit vector (pointing angles in 
                         aircraft(AC) coordinate system) of a WCR2 antenna
                         beam optimized using ground returns from SPP or 
                         CPP WCR2 raw data files
+                        
 wcr2calcoeff.pro      - calculate hh-pol calibration coeff. from corner 
                         reflector measurements
+                        
 wcr2conf__define.pro  - defines WCR2 configuration named structure
+
 wcr2conf.pro          - returns experiment specific WCR2 configuration 
                         structure with information about the radar 
                         installation and calibration parameters
+                        
 wcr2crdata.pro        - returns WCR2 Corner Reflector(CR) measurement data 
                         structure
+                        
 wcr2fh__define.pro    - defines WCR2 raw data first, fixed size file 
                         header named structure (for all radar algorithms)
+                        
 wcr2crproc.pro        - extracts WCR2 corner reflector power calibration 
                         data
+                        
 wcr2pwrcalco.pro      - calibrate WCR2 received co-polarized power in 
                         equivalent Z [mm^6/m^3]. Mean (moving average 
                         with Nswin window) noise power is subtracted (no 
@@ -82,39 +101,50 @@ wcr2pwrcalco.pro      - calibrate WCR2 received co-polarized power in
                         Power values below the mean noise (negative) are
                         left in the output (to allow proper power 
                         averaging later on if desired).
+                        
 wcr2pwrcalcr.pro      - calibrate WCR2 received cross-polarized power in
                         equivalent Z [mm^6/m^3].
+                        
 wcr2pwrprod.pro       - returns reflectivity structure for a given WCR2 
                         raw file
+                        
 wcr2rh__define.pro    - defines WCR2 raw data record (radar profile)
                         header named structure
+                        
 wcr2rxnfg.pro         - calculates Noise Figure and receiver gain for WCR
                         from hot load and warm load power measurements. 
                         Sufficient smoothing (SM keyword) must be used to
                         bring the uncertainty in the power measurements
                         well below the expected noise power increase for
                         the hot load (around 0.2 dB)
+                        
 wcr2timeoff.pro       - calculates time offset between WCR2 time stamps 
                         and platform data system time stamps.  It also 
                         returns the corresponding correlation coefficient.
+                        
 writewcr2raw.pro      - re-writes(copy) a fraction of a  WCR2 raw file to a 
                         new file.
+                        
 
 ##Routines for creating WCR NetCDF files from WCR raw data
 
 wcr2cdl2nc.       - Generate WCR netcdf file from a prototype cdl 
                     file (ncgen utility)
+                    
 wcr2createnc      - generate netcdf file(s) from a given cdl file, 
                     WCR2 raw data file(s), and optional WCR2 platform
                     motion(aircraft) navigational data file
+                    
 wcr2threshnc      - Return range adjusted reflectivity threshold,
                     fltarr(rangegates,profile), given radar range gates in 
                     meters and reflectivity noise standard deviation in 
                     equivalent dBZ@1km
+                    
 wcr2write1nc      - calculate radar received power related products
                     from a WCR2 raw file and write them to an already
                     generated (by wcr2cdl2nc) netcdf file.
                     Other ancillary variables are also recorded
+                    
 wcr2write2nc      - calculate radar received Doppler velocity related
                     products from a WCR2 raw file and write them to 
                     an already generated (by wcr2cdl2nc) netcdf file 
@@ -125,10 +155,13 @@ wcr2write2nc      - calculate radar received Doppler velocity related
 ac2wcr     - Interpolates an aircraft variable time dimension 
              to match WCR time dimension (profiles) or WCR variable
              profile dimension to match AC time (WCRTOOLS library)
+             
 ac2gt      - Returns single precision AC (aircraft) to EARTH or 
              EARTH to AC coordinate transformation matrix (WCRTOOLS library).
+             
 wcrdopcor  - Returns WCR radial Doppler velocity corrected for AC motion.
              Positive velocity is toward the radar (WCRTOOLS library).
+             
 wcrwunfold - Returns shifted/unfolded WCR Doppler corrected for AC motion
              velocity around given wind value component into the WCR beam
              (WCRTOOLS library).
@@ -138,11 +171,14 @@ acdata     - returns UW_KingAir/NCAR_C130 selected INS and
              There is only one time dimension in the loaded
              variables. See the notes.  Time variable is 
              resampled to match data sampling rate (sps).
+             
 acwcr2data - returns an aircraft(AC) data structure associated
              with a WCR2 configuration
+             
 wcr2dopcor - returns WCR2 radial Doppler velocity w.r.t. 
              ground corrected for aircraft (AC) motion. 
              Positive velocity is toward the radar. 
+             
 wcr2dopprod- returns corrected Doppler velocity (and misc.
              velocity related variables) structure for given
              WCR2 and corsponding aircraft data files
@@ -153,7 +189,8 @@ wcr2dopprod- returns corrected Doppler velocity (and misc.
 
 ac2loadnc        - returns KingAir or NCAR C130 aircraft data 
                    variable from a netCDF file. There is only one 
-                   time dimension in the returned variable.  
+                   time dimension in the returned variable. 
+                    
 wcr2loadnc       - load variables from a WCR netcdf file
 
 
@@ -162,6 +199,7 @@ wcr2loadnc       - load variables from a WCR netcdf file
 wcr2calthreshnc - return thresholded reflectivity in dBZ
                   Optionally it can also return thresholded Doppler
                   velocity field (expnded version of wcr2threshnc)
+                  
 wcr2plotnc      - display reflectivity and Doppler velocity for 
                   selected WCR2  netcdf files
 
@@ -172,16 +210,19 @@ wcrud2altnc -   Returns WCR up(beam1), down(beam1), or down&up(beam1&beam2)
                 If beam(s) pointing angles are not given assume no deviation from 
                 vertical (straight leg, small attitude angles)
                 (WCRTOOLS library).
+                
 wcrud2udnc  -   Returns the combined reflectivity or velocity field (nrg, nrpofs).  
                 from the 'up' and the 'down' WCR beams. The ranges added in the
                 gap between the first valid 'up' and 'down' gates are filled with 
                 missing values.  The missing values of the output are always NaN.
                 (WCRTOOLS library).
+                
 wcrwdvnc    -   Adjust the airborne radar radial Doppler velocity from the 
                 Up/Down-pointing antenna for horizontal wind contribution.
                 The routine uses Doppler velocity already corrected for the 
                 aircraft motion contribution.
                 (WCRTOOLS library).
+                
 h2omwir     -   Returns complex refraction index of pure water/ice for a given
                 microwave frequency in GHz and temperature in degree Celsius
                 (WCRTOOLS library).
