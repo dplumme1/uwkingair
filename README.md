@@ -18,6 +18,8 @@ Nick has begun to port some software over to python and in some cases you will f
 
 ##Contact information:
 
+General inquiry (atsc-kapm@uwyo.edu)
+
 Nick Guy (nick.guy@uwyo.edu)
 
 Larry Oolman (ldoolman@uwyo.edu)
