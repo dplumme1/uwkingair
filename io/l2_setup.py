@@ -65,7 +65,7 @@ def run():
     '''
     variables = {
                 'time': 'time',
-                # Aircraft State
+                # Aircraft Position
                 'LONC': 'longitude',
                 'LATC': 'latitude',
                 'ztrue': 'altitude',
@@ -78,8 +78,9 @@ def run():
                 'AVthead': 'heading',
                 'AVpitch': 'pitch_angle',
                 'AVroll': 'roll_angle',
-                'alpha': 'attack_angle',
-                'beta': 'sideslip_angle',
+                #'alpha': 'attack_angle',
+                #'beta': 'sideslip_angle',
+                'boom_pcor': 'boom_pcor',
                 #'AVxdist': 'ew_position',
                 #'AVydist': 'ns_position',
                 
@@ -93,6 +94,9 @@ def run():
                 'rh': 'rh',
                 'mr': 'mixing_ratio',
                 'lwc100': 'lwc',
+                'turb': 'turb',
+                
+                # Radiometric
                 'irtc': 'irt',
                 'irbc': 'irb',
                 'swt': 'swt',
@@ -111,19 +115,17 @@ def run():
                 'co21s': 'co2_conc',
                 'h2o1s': 'h2o_conc',
                 
-                # PCASP
+                # Aerosol
                 'AS200_OBR': 'pcasp_num',
                 'CS200_OBR': 'pcasp_conc',
                 'DBARP_OBR': 'pcasp_mean_diam',
                 'PSFCP_OBR': 'pcasp_surf_area_conc',
                 'PVOLP_OBR': 'pcasp_vol_conc',
                 
-                # CPC
+                # Cloud Physics
                 'conc_cpc': 'cpc_conc',
                 
                 # Miscellaneous
-                'boom_pcor': 'boom_pcor',
-                'turb': 'turb',
                 'topo': 'topo',
                 }
 
