@@ -36,7 +36,7 @@ Non-unicode characters sometimes appear in the limits update boxes.
 # NOTES:: Testing was performed on 2014 flights.
 #-------------------------------------------------------------------
 # Load the needed packages
-from netCDF4 import Dataset
+from netCDF4 import Dataset, stringtochar
 import datetime
 import numpy as np
 import argparse
@@ -55,8 +55,8 @@ GLOB_ATTS = ['Source', 'Address', 'Phone', \
              'time_coverage_start', 'time_coverage_end', \
              'FlightDate', 'TimeInterval', \
              'Conventions', 'ConventionsURL', 'ConventionsVersion',\
-             'geospatial_lat_min', 'geospatial_lat_max',\
-             'geospatial_lon_min', 'geospatial_lon_max',\
+#             'geospatial_lat_min', 'geospatial_lat_max',\
+#             'geospatial_lon_min', 'geospatial_lon_max',\
              'CenterCoordLon0','CenterCoordLat0','CenterCoordName']
              
 STD_ATTS = ['long_name', 'standard_name', 'units', \
@@ -80,7 +80,11 @@ class FlightDictMap(object):
         Parameters [optional]
         ----------
         setupfilepath : str
-            If supplied the 
+            The longpath name of the python script that contains
+            a dictionary mapping of variable names to be used.
+            If supplied the setup file mapping is used. 
+            If not supplied then a default is provided below.
+            
         '''
         self.setupfilepath = setupfilepath
 
@@ -102,10 +106,10 @@ class FlightDictMap(object):
     def default_setup(self):
         variables = {
                     'time': 'time',
-                    'LONC': 'lon',
-                    'LATC': 'lat',
-                    'GALT': 'alt',
-                    'PALT': 'alt_pres',
+                    'LONC': 'longitude',
+                    'LATC': 'latitude',
+                    'GALT': 'altitude',
+                    'PALT': 'alt_pressure',
                     'tas': 'tas',
                     'AVewvel': 'grnd_spd_u',
                     'AVnsvel': 'grnd_spd_v',
@@ -123,7 +127,7 @@ class FlightDictMap(object):
                     }
 
         varattr = {
-                  'lon': (['standard_name', 'instrument'], 
+                  'longitude': (['standard_name', 'instrument'], 
                           ['Longitude', 'Applanix AV-410']),
 
                   'u_wind': (['long_name', 'standard_name', 'instrument'],
@@ -141,10 +145,24 @@ class FlightDictMap(object):
                    }
         return  variables, varattr, globattr
 
+
 class L2_Process(object):
     """Class to hold the L2 file processing."""
-    def __init__(self, MapDict, filePath=None):
-        '''Initialize the class.'''
+    def __init__(self, MapDict, filePath=None, use_gattr=False):
+        '''
+        Initialize the class.
+
+        Parameters [optional]
+        ----------
+        MapDict: FlightDictMap class
+            The mapping dictionary to be used.
+        filepath : str
+            Long pathname to the input NetCDF file to process.
+        use_gattr : bool
+            True changes the MapDict mapping to suggested variables
+            contained in the global attributes.
+            False does nothing.    
+        '''
         # Set some parameters
         self.SetupMap = MapDict
         self.infilepath = filePath
@@ -157,6 +175,29 @@ class L2_Process(object):
 
         # Read in the processed Flight Data NetCDF file
         self.read_uwka_flight()
+
+        # Check whether to use global attributes for some variable mapping
+        if use_gattr:
+            print("Trying global attributes for mapping...")
+            coords = self.ncFile.coordinates.split()
+            winds = self.ncFile.wind_field.split()
+            print(coords + winds)
+            self._replace_dictionary_keys(coords + winds)
+
+#            # Try to pull out coordinate information from global attributes
+#            try:
+#                self._test_coordinates()
+#            except:
+#                import sys
+#                e = sys.exc_info()[0]
+#                print("Error: %s" % e)
+#                print("Coordinate mapping not in global attributes")
+                    
+            # Try pulling out wind information from global attributes
+#            try:
+#                self._test_winds()
+#            except:
+#                print("Wind mapping not in global attributes")
 
         # Create the output L2 User Flight NetCDF file
         self.print_msg("\nCreating %s"%self.outfilepath)
@@ -203,12 +244,44 @@ class L2_Process(object):
         self.print_msg("\nAdding global attributes to L2 file")
         for gatt in self.SetupMap.globattr.keys():
             self.add_glob_attr(gatt, self.SetupMap.globattr[gatt])
-        
+
         # Close the input file
         self.ncFile.close()
 
         # Close the output file
         self.outfile.close()
+
+    def _test_coordinates(self):
+        coords = self.ncFile.coordinates.split()
+        self._replace_dictionary_keys(coords)
+
+    def _test_winds(self):
+        winds = self.ncFile.wind_field.split()
+        self._replace_dictionary_keys(winds)
+
+    def _replace_dictionary_keys(self, str_list):
+        for key, val in self.SetupMap.variables.items():
+            if val == 'longitude':
+                self.SetupMap.variables[str_list[0]] = self.SetupMap.variables.pop(key)
+                print("substituting %s for %s variable"%(str_list[0], key))
+            elif val == 'latitude':
+                self.SetupMap.variables[str_list[1]] = self.SetupMap.variables.pop(key)
+                print("substituting %s for %s variable"%(str_list[1], key))
+            elif val == 'altitude':
+                self.SetupMap.variables[str_list[2]] = self.SetupMap.variables.pop(key)
+                print("substituting %s for %s variable"%(str_list[2], key))
+            elif val == 'time':
+                self.SetupMap.variables[str_list[3]] = self.SetupMap.variables.pop(key)
+                print("substituting %s for %s variable"%(str_list[3], key))
+            elif val == 'wind_spd':
+                self.SetupMap.variables[str_list[4]] = self.SetupMap.variables.pop(key)
+                print("substituting %s for %s variable"%(str_list[4], key))
+            elif val == 'wind_dir':
+                self.SetupMap.variables[str_list[5]] = self.SetupMap.variables.pop(key)
+                print("substituting %s for %s variable"%(str_list[5], key))
+            elif val == 'w_wind':
+                self.SetupMap.variables[str_list[6]] = self.SetupMap.variables.pop(key)
+                print("substituting %s for %s variable"%(str_list[6], key))
 
     def print_msg(self, str):
         print(str)
@@ -252,22 +325,24 @@ class L2_Process(object):
 
     def write_glob_attr(self):
         '''Write the global attributes.'''
-        self.outfile.description = "UWKA Level 2 Data"
-
-        self.outfile.documentation = "http://flights.uwyo.edu/n2uw/users/"
+        self.global_atts = {
+                            'description': "UWKA Level 2 Data",
+                            'documentation': "http://flights.uwyo.edu/n2uw/users/",
+                            'created_UTC': datetime.datetime.utcnow().isoformat(),
+                            'coordinates': "longitude latitude altitude time",
+                            'latitude_coordinate': "latitude",
+                            'longitude_coordinate': "longitude",
+                            'zaxis_coordinate': "altitude",
+                            'time_coordinate': "time",
+                            'wind_field': "wind_dir wind_spd w_wind",
+                            }
         for attname in GLOB_ATTS:
-            self.outfile.__setattr__(attname, getattr(self.ncFile, attname))
-        self.outfile.created_UTC = datetime.datetime.utcnow().isoformat()
-        self.coordinates = "lon lat alt time"
-        self.latitude_coordinate = "lat"
-        self.longitude_coordinate = "lon"
-        self.zaxis_coordinate = "alt"
-        self.time_coordinate = "time"
-        self.wind_field = "wind_dir wind_spd w_wind"
+            self.global_atts[attname] = str(getattr(self.ncFile, attname))
+        self.outfile.setncatts(self.global_atts)
 
     def add_glob_attr(self, attname, attval):
         '''Add a global attribute from setup file.'''
-        self.outfile.__setattr__(attname, attval)
+        self.outfile.setncattr(attname, attval)
 
     ##########################
     ##  WRITE FILE METHODS  ##
@@ -353,6 +428,9 @@ if __name__ == '__main__':
     igroup.add_argument('-s', '--setupfilepath',
     help='Full path of the setup mapping file',
     default=None)
+    
+    parser.add_argument('-b', action='store_true',
+    help='Use built-in coordinate information in global attributes')
 
     parser.add_argument('-v', '--version', action='version',
     version='Version %s' % (VERSION))
@@ -363,4 +441,4 @@ if __name__ == '__main__':
     # If there is a mapping file then process
     SetupMap = FlightDictMap(setupfilepath=args.setupfilepath)
     
-    L2_Process(SetupMap, filePath=args.inputfile)
+    L2_Process(SetupMap, filePath=args.inputfile, use_gattr=args.b)
