@@ -14,6 +14,8 @@ See below for file extension and corresponding program language:
 	
 	.py  --> Python
 	
+	.ipynb --> IPython notebook
+	
 Nick has begun to port some software over to python and in some cases you will find the same program in two language variations.
 
 ##Contact information:
