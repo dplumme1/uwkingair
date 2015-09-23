@@ -2,39 +2,26 @@
 #******************************
 # make_uwka_l2_flight.py
 #******************************
-'''
-Create an L2 user file using L1 proccessed data
+"""
+Create an L2 user file using L1 proccessed UWKA flight data.
+Command line operation, use -h option for help.
+Optional mapping dictionary can be pulled in to customize
+L2 file.
 
 Author
 ------
-Nick Guy
+Nick Guy  6 Feb 2015.
 
-History
--------
-6 Feb 2015 - Created.
-24 Aug 2015 - Converted to class structure with default file creation.
-
-Usage::
+Usage
 -----
-python uwka_make_l2_flight /some/directory/path/to/look/in/filename --setupdir /some/directory/path/to/look/in
+python make_uwka_l2_flight -h
 
-TODO::
+TODO
 ----
 Improve error handling.
 File check for zipped files.
-Add ability to reconfigure layout switching from scan types,
-i.e. PPI to RHI.
-Speed up interactive modification of limits for
-contouring, xrange, and yrange.
+"""
 
-KNOWN BUGS::
-----------
-Some crashes after some number of left and right keystrokes.
-Non-unicode characters sometimes appear in the limits update boxes.
-'''
-#-------------------------------------------------------------------
-# NOTES:: Testing was performed on 2014 flights.
-#-------------------------------------------------------------------
 # Load the needed packages
 from netCDF4 import Dataset, stringtochar
 import datetime
