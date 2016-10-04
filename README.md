@@ -26,4 +26,6 @@ Nick Guy (nick.guy@uwyo.edu)
 
 Larry Oolman (ldoolman@uwyo.edu)
 
+David Plummer (dplumme1@uwyo.edu)
+
 Individual directories have instrument-specific contacts.
